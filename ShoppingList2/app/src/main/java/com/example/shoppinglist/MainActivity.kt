@@ -1,5 +1,6 @@
 package com.example.shoppinglist
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -10,6 +11,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     private var shoppingMainList = arrayListOf<RVShoppingItem>()
     lateinit var adapter: RecyclerAdapter
+    lateinit var alertDialogBuilder: AlertDialog.Builder
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +31,15 @@ class MainActivity : AppCompatActivity() {
         adapter = RecyclerAdapter()
         shoppingListRecView.adapter = adapter
         shoppingListRecView.layoutManager = LinearLayoutManager(this)
+
+        val alertDialogBuilder = AlertDialog.Builder(this)
+        alertDialogBuilder.setTitle("Delete item?")
+        alertDialogBuilder.setMessage("Are you sure you want to delete this item?")
+
+        alertDialogBuilder.setNegativeButton(android.R.string.no) { _, _ ->
+            Toast.makeText(applicationContext,
+                android.R.string.no, Toast.LENGTH_SHORT).show()
+        }
 
 
         //Button and text stuff
@@ -40,10 +52,22 @@ class MainActivity : AppCompatActivity() {
         //onlongclick = delete
         adapter.onLongClick = {
 
-            //create an alert to go here to ask for deletion
-            //for now it just removes the item
-            Toast.makeText(this, "Long press has been activated", Toast.LENGTH_SHORT).show()
-            shoppingMainList.remove(it)
+//            Toast.makeText(this, "Long press has been activated", Toast.LENGTH_SHORT).show()
+
+            //This is not the best way to do this, but it creates a button that confirms deleting the item
+            alertDialogBuilder.setPositiveButton(android.R.string.yes) { _, _ ->
+                Toast.makeText(applicationContext,
+                    "Removing item...", Toast.LENGTH_SHORT).show()
+
+                //removes selected item
+                shoppingMainList.remove(it)
+
+                //refreshes the list
+                adapter.shoppingList = shoppingMainList.reversed()
+                adapter.notifyDataSetChanged()
+            }
+            alertDialogBuilder.show()
+
         }
 
     }
