@@ -32,19 +32,22 @@ class MainActivity : AppCompatActivity() {
         shoppingListRecView.adapter = adapter
         shoppingListRecView.layoutManager = LinearLayoutManager(this)
 
+        //creates alert dialogue
         val alertDialogBuilder = AlertDialog.Builder(this)
         alertDialogBuilder.setTitle("Delete item?")
         alertDialogBuilder.setMessage("Are you sure you want to delete this item?")
 
+        //sets a cancel button
         alertDialogBuilder.setNegativeButton(android.R.string.no) { _, _ ->
             Toast.makeText(applicationContext,
                 android.R.string.no, Toast.LENGTH_SHORT).show()
         }
 
 
-        //Button and text stuff
+        //'Add' button
         val addItemButton: Button = findViewById(R.id.addItemButton)
 
+        //if 'Add' is pressed it adds the item to the list
         addItemButton.setOnClickListener {
             addNewItem()
         }
@@ -72,9 +75,12 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    //adds a 'Sign in' button to hte top of the menu
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.my_menu, menu)
         return super.onCreateOptionsMenu(menu)
+
+        //I wanted it so that when this is pressed you would be able to go to the created 'Log in' screen
     }
 
     private fun addNewItem() {
@@ -83,6 +89,7 @@ class MainActivity : AppCompatActivity() {
 
         var newItemText: String = addItemShopList.text.toString()
 
+        //adds the item only if something is written in the 'edit text' field
         if( newItemText.isNotEmpty() ){
 //            Toast.makeText(this, "Added new item: $newItemText", Toast.LENGTH_SHORT).show()
 
@@ -97,6 +104,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Please enter an item!", Toast.LENGTH_SHORT).show()
         }
 
+        //clears text field
         addItemShopList.text.clear()
     }
 
