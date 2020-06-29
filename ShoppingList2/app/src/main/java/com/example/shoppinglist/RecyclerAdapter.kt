@@ -36,11 +36,7 @@ class RecyclerAdapter: RecyclerView.Adapter<ShoppingListViewHolder>() {
         }
 
         holder.itemView.cbItemGot.setOnCheckedChangeListener { _, isChecked ->
-            var boolean = isChecked
-
-            println(boolean.toString())
-
-            shoppingItem.itemGot = boolean
+            shoppingItem.itemGot = isChecked
             onCheckChange?.invoke(shoppingItem)
         }
     }

@@ -81,7 +81,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         adapter.onCheckChange = {
-//            shoppingListDAO.update(it)
+            AsyncTask.execute {
+                shoppingListDAO.update(it)
+            }
         }
 
         getShoppingList()
