@@ -1,6 +1,7 @@
 package com.example.shoppinglist
 
 import android.content.DialogInterface
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -23,11 +24,15 @@ class MainActivity : AppCompatActivity() {
     private var shoppingMainList = arrayListOf<RVShoppingItem>()
     lateinit var adapter: RecyclerAdapter
     lateinit var alertDialogBuilder: AlertDialog.Builder
+    private val shoppingListDAO by lazy {
+        ShoppingListRoomDB.getDatabase(this).shoppingListDAO()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //Recycler view setup
         adapter = RecyclerAdapter()
         shoppingListRecView.adapter = adapter
         shoppingListRecView.layoutManager = LinearLayoutManager(this)
@@ -52,6 +57,8 @@ class MainActivity : AppCompatActivity() {
             addNewItem()
         }
 
+        getShoppingList()
+
         //onlongclick = delete
         adapter.onLongClick = {
 
@@ -63,15 +70,21 @@ class MainActivity : AppCompatActivity() {
                     "Removing item...", Toast.LENGTH_SHORT).show()
 
                 //removes selected item
-                shoppingMainList.remove(it)
+                AsyncTask.execute {
+                    shoppingListDAO.delete(it)
+                    getShoppingList()
+                }
 
-                //refreshes the list
-                adapter.shoppingList = shoppingMainList.reversed()
-                adapter.notifyDataSetChanged()
             }
             alertDialogBuilder.show()
 
         }
+
+        adapter.onCheckChange = {
+//            shoppingListDAO.update(it)
+        }
+
+        getShoppingList()
 
     }
 
@@ -87,18 +100,17 @@ class MainActivity : AppCompatActivity() {
 
         val addItemShopList: EditText = findViewById(R.id.addItemEditText)
 
-        var newItemText: String = addItemShopList.text.toString()
+        val newItemText: String = addItemShopList.text.toString()
 
         //adds the item only if something is written in the 'edit text' field
         if( newItemText.isNotEmpty() ){
 //            Toast.makeText(this, "Added new item: $newItemText", Toast.LENGTH_SHORT).show()
 
-            var newItem = RVShoppingItem()
-            newItem.itemName = newItemText
-
-            shoppingMainList.add(newItem)
-            adapter.shoppingList = shoppingMainList.reversed()
-            adapter.notifyDataSetChanged()
+            val newItem = RVShoppingItem(itemName = newItemText, itemGot = false)
+            AsyncTask.execute {
+                shoppingListDAO.insert(newItem)
+                getShoppingList()
+            }
 
         } else {
             Toast.makeText(this, "Please enter an item!", Toast.LENGTH_SHORT).show()
@@ -108,4 +120,13 @@ class MainActivity : AppCompatActivity() {
         addItemShopList.text.clear()
     }
 
+    private fun getShoppingList() {
+        AsyncTask.execute {
+            val list = shoppingListDAO.getShoppingList()
+            runOnUiThread {
+                adapter.shoppingList = list.reversed()
+                adapter.notifyDataSetChanged()
+            }
+        }
+    }
 }
